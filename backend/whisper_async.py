@@ -21,7 +21,7 @@ def transcribe(model, language, mic_energy, pause_duration, mic_dynamic_energy, 
     # if model != "large" and language == 'english':
     #     model = model + ".en"
     # we are using the dutch model so we don't need to add .en
-    
+
     audio_model = whisper.load_model(model)
 
     r = sr.Recognizer() # added audio reconizer wasn't in the original async code --Milan
@@ -43,5 +43,5 @@ def transcribe(model, language, mic_energy, pause_duration, mic_dynamic_energy, 
             predicted_text = result["text"]
             print("Text: " + predicted_text)
 
-            if check_stop_word(predicted_text, stop_word):
-                break
+            # if check_stop_word(predicted_text, stop_word):
+            #     break

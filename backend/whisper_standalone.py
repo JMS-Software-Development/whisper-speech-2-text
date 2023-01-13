@@ -72,8 +72,8 @@ def transcribe():
                     print(k,v)
                 print("Processing delay: ", duration)
             
-            if check_stop_word(predicted_text):
-                break
+            # if check_stop_word(predicted_text):
+            #     break
 
 
 if __name__ == "__main__":
