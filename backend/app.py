@@ -16,8 +16,10 @@ def transcribe():
         model = request.form['model_size']
 
         # there are no english models for large
-        if model != 'large' and language == 'english':
-            model = model + '.en'
+        # if model != 'large' and language == 'english':
+        #     model = model + '.en'
+        # we are using the dutch model so we don't need to add .en
+
         audio_model = whisper.load_model(model)
 
         temp_dir = tempfile.mkdtemp()
@@ -26,11 +28,7 @@ def transcribe():
         wav_file = request.files['audio_data']
         wav_file.save(save_path)
 
-        if language == 'english':
-            result = audio_model.transcribe(save_path, language='english')
-        else:
-            result = audio_model.transcribe(save_path)
-
+        result = audio_model.transcribe(save_path, language='dutch')
         return result['text']
     else:
         return "This endpoint only processes POST wav blob"

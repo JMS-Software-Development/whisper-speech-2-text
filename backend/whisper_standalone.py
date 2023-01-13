@@ -36,9 +36,11 @@ def check_stop_word(predicted_text: str) -> bool:
 
 def transcribe():
     model = args.model
-    # there are no english models for large
-    if args.model != "large" and args.english:
-        model = model + ".en"
+    # there are no english models for large 
+    # if args.model != "large" and args.english:
+    #     model = model + ".en"
+    # we are using the dutch model so we don't need to add .en
+
     audio_model = whisper.load_model(model)
 
     # load the speech recognizer with CLI settings
@@ -56,11 +58,8 @@ def transcribe():
             data = io.BytesIO(audio.get_wav_data())
             audio_clip = AudioSegment.from_file(data)
             audio_clip.export(save_path, format="wav")
-
-            if args.english:
-                result = audio_model.transcribe(save_path, language='english')
-            else:
-                result = audio_model.transcribe(save_path)
+            # use dutch model
+            result = audio_model.transcribe(save_path, language="dutch")
 
             if not args.verbose:
                 predicted_text = result["text"]

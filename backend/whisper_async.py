@@ -18,10 +18,17 @@ def check_stop_word(predicted_text: str, stop_word: str) -> bool:
 
 def transcribe(model, language, mic_energy, pause_duration, mic_dynamic_energy, stop_word):
     # there are no english models for large
-    if model != "large" and language == 'english':
-        model = model + ".en"
+    # if model != "large" and language == 'english':
+    #     model = model + ".en"
+    # we are using the dutch model so we don't need to add .en
+    
     audio_model = whisper.load_model(model)
 
+    r = sr.Recognizer() # added audio reconizer wasn't in the original async code --Milan
+    r.energy_threshold = mic_energy
+    r.pause_threshold = pause_duration
+    r.dynamic_energy_threshold = mic_dynamic_energy
+    
     with sr.Microphone(sample_rate=16000) as source:
         print("Let's get the talking going!")
         while True:
@@ -30,12 +37,9 @@ def transcribe(model, language, mic_energy, pause_duration, mic_dynamic_energy, 
             data = io.BytesIO(audio.get_wav_data())
             audio_clip = AudioSegment.from_file(data)
             audio_clip.export(save_path, format="wav")
-
-            if language == 'english':
-                result = audio_model.transcribe(save_path, language='english')
-            else:
-                result = audio_model.transcribe(save_path)
-
+            # use dutch model
+            result = audio_model.transcribe(save_path, language="dutch")
+  
             predicted_text = result["text"]
             print("Text: " + predicted_text)
 
