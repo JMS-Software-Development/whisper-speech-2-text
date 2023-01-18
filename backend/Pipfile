@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+tqdm = "*"
+transformers = ">=4.19.0"
+ffmpeg-python = "==0.2.0"
+pyaudio = "*"
+speechrecognition = "*"
+pydub = "*"
+wheel = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
