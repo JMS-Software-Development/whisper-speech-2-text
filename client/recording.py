@@ -7,6 +7,7 @@ import audioop
 import tempfile
 import numpy
 from queue import Queue
+import whisper
 from pydub import AudioSegment
 from time import sleep
 from datetime import datetime, timedelta
@@ -15,7 +16,7 @@ from time import perf_counter
 
 def main():
 
-
+    audio_model = whisper.load_model('medium', 'cuda')
     def BytesToWave(bytes):
         # Write out raw frames as a wave file.
         wav_file = io.BytesIO()
@@ -41,6 +42,11 @@ def main():
 
         print('Audio normalized', audio_normalised)
         # Send audio normalized to whisper!!!!
+        if audio_normalised.size > 0:
+            result = audio_model.transcribe(audio_normalised, language='dutch')
+            transcribed_text = result['text'].strip()
+            print(result)
+            print('Output: ', transcribed_text)
 
     
     max_record_time = 30
