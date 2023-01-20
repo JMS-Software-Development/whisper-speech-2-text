@@ -97,6 +97,7 @@ const App = ({ classes }) => {
   }
 
   function transcribeRecording(recordedBlob) {
+    console.log("Starting transcribing...")
     const headers = {
       "content-type": "multipart/form-data",
     };
@@ -104,7 +105,7 @@ const App = ({ classes }) => {
     formData.append("language", selectedLangRef.current)
     formData.append("model_size", modelOptions[selectedModelRef.current])
     formData.append("audio_data", recordedBlob.blob, 'temp_recording');
-    axios.post("http://0.0.0.0:8000/transcribe", formData, { headers })
+    axios.post("http://185.4.148.142:8000/transcribe", formData, { headers })
       .then((res) => {
         setTranscribedData(oldData => [...oldData, res.data])
         setIsTranscribing(false)
