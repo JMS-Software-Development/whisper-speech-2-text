@@ -44,7 +44,9 @@ def transcribe():
     r.energy_threshold = args.energy
     r.pause_threshold = args.pause
     r.dynamic_energy_threshold = args.dynamic_energy
-
+    # TODO:check how it knows when sentence is done
+    # TODO:whene max time is reached, stop sentence
+    # TODO: How does with work?
     with sr.Microphone(sample_rate=16000, device_index=args.mic_index) as source:
         print("Let's get the talking going! Listening to mic: ", args.mic_index)
         while True:
@@ -55,9 +57,12 @@ def transcribe():
             audio_clip = AudioSegment.from_file(data)
             audio_clip.export(save_path, format="wav")
             
+
+            #TODO create request to backend
             files = {'upload_file': open("recordings_" + str(args.mic_index) + "/temp.wav",'rb')}
             url = ""
             requests.post(url, files=files)
+
             
             
             
