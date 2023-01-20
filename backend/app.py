@@ -14,7 +14,7 @@ def transcribe():
         language = request.form['language']
         model = request.form['model_size']
 
-        audio_model = whisper.load_model(model)
+        audio_model = whisper.load_model(model, device='cuda')
 
         temp_dir = tempfile.mkdtemp()
         save_path = os.path.join(temp_dir, 'temp.wav')
