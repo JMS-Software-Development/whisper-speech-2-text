@@ -5,6 +5,7 @@ from flask import request
 from flask_cors import CORS
 import whisper
 import datetime
+import time
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -13,6 +14,8 @@ def transcribe():
     if request.method == 'POST':
         language = request.form['language']
         model = request.form['model_size']
+
+        time = time.time()
 
         audio_model = whisper.load_model(model, device='cuda')
 
@@ -29,6 +32,7 @@ def transcribe():
             f.write(datetime.datetime.now().isoformat()+ ": " + result['text'])
         
         print(result['text'])
+        print(f"Transcribing took {time.time()-time} seconds")
         return result['text']
     else:
         return "This endpoint only processes POST wav blob"
