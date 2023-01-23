@@ -4,20 +4,26 @@ import flask
 from flask import request
 from flask_cors import CORS
 import whisper
-import datetime
-import time
 
 app = flask.Flask(__name__)
 CORS(app)
+
+
+class DataStore():
+    language = "dutch"
+    model = "medium"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    audio_model = whisper.load_model(model, langauge=language)
+
+data = DataStore()
+
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     if request.method == 'POST':
-        language = request.form['language']
-        model = request.form['model_size']
+        #language = request.form['language']
+        #model = request.form['model_size']
 
-        time = time.time()
-
-        audio_model = whisper.load_model(model, device='cuda')
+        audio_model = data.audio_model
 
         temp_dir = tempfile.mkdtemp()
         save_path = os.path.join(temp_dir, 'temp.wav')
@@ -25,14 +31,7 @@ def transcribe():
         wav_file = request.files['audio_data']
         wav_file.save(save_path)
 
-        result = audio_model.transcribe(save_path, language='dutch')
-        #save result to computer with timestamp
-        save_path = os.path.join(temp_dir, 'result.txt')
-        with open(save_path, 'w') as f:
-            f.write(datetime.datetime.now().isoformat()+ ": " + result['text'])
-        
-        print(result['text'])
-        print(f"Transcribing took {time.time()-time} seconds")
+        result = audio_model.transcribe(save_pat)
         return result['text']
     else:
         return "This endpoint only processes POST wav blob"
