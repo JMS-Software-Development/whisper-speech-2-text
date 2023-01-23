@@ -13,10 +13,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-COPY ./requirements.txt /app/requirements.txt
+COPY backend/requirements.txt /app/requirements.txt
 
 WORKDIR /app
-COPY . /app
+COPY backend /app
 
 # Install pip requirements
 RUN python -m pip install -r requirements.txt
