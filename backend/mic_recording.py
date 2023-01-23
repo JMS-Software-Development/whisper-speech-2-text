@@ -63,10 +63,14 @@ def transcribe():
             audio_clip.export(save_path, format="wav")
             
 
-            # #TODO create request to backend
-            # files = {'upload_file': open("recordings_" + str(args.mic_index) + "/temp.wav",'rb')}
-            # url = ""
-            # requests.post(url, files=files)
+            #TODO create request to backend
+            files = {'audio_data': open(save_path,'rb').read()}
+            url = "http://185.4.151.10:8000"
+            # headers = {'Content-Type': 'multipart/form-data'}
+            # form_data = {'audio_data': open(save_path,'rb')}
+
+            response = requests.post(url+"/transcribe", files=files)
+            print(response.text)
             
             # for testing
             # result = audio_model.transcribe(save_path, language="dutch")
