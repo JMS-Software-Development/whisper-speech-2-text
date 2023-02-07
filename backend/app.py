@@ -9,6 +9,7 @@ from flask_cors import CORS
 import whisper
 import torch
 import time 
+from stable_diffusion.generate import generateImage
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -30,19 +31,19 @@ def transcribe_thread():
     print("Starting transcribing thread")
     while True:
         if dataQueue.empty():
-            print("No audio data in queue")
+            # print("No audio data in queue")
             time.sleep(1)
         else:
             start_time = time.time()
-            print("Startinhg transcribing")
+            print("Starting transcribing")
             audio_model = data.audio_model
             save_path = dataQueue.get()
 
             result = audio_model.transcribe(save_path, language='dutch')
 
-            print(result['text'])
             print(f"Transcribing took {time.time() - start_time} seconds")
-            print(result['text'])
+            print("Resut: " + result['text'])
+            generateImage(result['text'])
 
 transcriber = Thread(target=transcribe_thread)
 transcriber.start()
