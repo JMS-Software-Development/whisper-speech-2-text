@@ -58,20 +58,21 @@ def transcribe():
             print("Time delta: ", datetime.datetime.now()-start_time)
             start = perf_counter()
             data = io.BytesIO(audio.get_wav_data())
-            audio_clip = AudioSegment.from_file(data)
-            save_path = os.path.join(folder_name, "recording"+datetime.datetime.now().isoformat()+".wav")
-            audio_clip.export(save_path, format="wav")
+            # audio_clip = AudioSegment.from_file(data)
+            # save_path = os.path.join(folder_name, "recording"+datetime.datetime.now().isoformat()+".wav")
+            # audio_clip.export(save_path, format="wav")
             
 
             #TODO create request to backend
-            files = {'audio_data': open(save_path,'rb').read()}
+            # files = {'audio_data': open(save_path,'rb').read()}
             url = "http://185.4.151.10:8000"
             # headers = {'Content-Type': 'multipart/form-data'}
             # form_data = {'audio_data': open(save_path,'rb')}
 
-            response = requests.post(url+"/transcribe", files=files)
-            print(response.text)
-            
+
+
+
+            requests.post(url+"/transcribe/"+str(args.mic_index), data=data, headers={'Content-Type': 'audio/wav'})
             # for testing
             # result = audio_model.transcribe(save_path, language="dutch")
 
