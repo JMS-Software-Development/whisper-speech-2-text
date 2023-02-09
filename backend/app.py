@@ -4,6 +4,7 @@ import tempfile
 import flask
 from flask import request
 import datetime
+import wave
 from threading import Thread
 from flask_cors import CORS
 import whisper
@@ -47,16 +48,18 @@ def transcribe_thread():
 transcriber = Thread(target=transcribe_thread)
 transcriber.start()
 folder_name = "recordings"
-os.makedirs(folder_name, exist_ok=True)
 
-@app.route('/transcribe', methods=['POST'])
-def addToQueue():
+@app.route('/transcribe/<mic>', methods=['POST'])
+def addToQueue(mic):
     if request.method == 'POST':
         #language = request.form['language']
         #model = request.form['model_size']
-        save_path = os.path.join(folder_name, "recording"+datetime.datetime.now().isoformat()+".wav")
-        wav_file = request.files['audio_data']
-        wav_file.save(save_path)
+        os.makedirs(folder_name+str(mic), exist_ok=True)
+        save_path = os.path.join(folder_name+str(mic), "recording"+datetime.datetime.now().isoformat()+".wav")
+
+        with open(save_path, 'wb') as f:
+            f.write(request.data)
+
         dataQueue.put(save_path)
 
         print("Added to queue")
