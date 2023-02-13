@@ -8,7 +8,6 @@ import argparse
 import io
 from pydub import AudioSegment
 import speech_recognition as sr
-import whisper
 import tempfile
 import datetime
 import os
@@ -65,7 +64,7 @@ def transcribe():
 
             #TODO create request to backend
             # files = {'audio_data': open(save_path,'rb').read()}
-            url = "http://185.4.151.10:8000"
+            url = "http://1d90-5-39-190-68.eu.ngrok.io"
             # headers = {'Content-Type': 'multipart/form-data'}
             # form_data = {'audio_data': open(save_path,'rb')}
 
