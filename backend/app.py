@@ -11,6 +11,7 @@ import whisper
 import torch
 import time 
 from stable_diffusion.generate import generateImage
+from data import *
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -40,32 +41,37 @@ def transcribe_thread():
             audio_model = data.audio_model
             save_path = dataQueue.get()
 
-            result = audio_model.transcribe(save_path, language='dutch')
+            result = audio_model.transcribe(save_path, language='dutch', fp16=False)
 
+            recording_id = save_path.split("-")[1]
             print(f"Transcribing took {time.time() - start_time} seconds")
             print("Resut: " + result['text'])
-            generateImage(result['text'])
+            if len(result['text'].strip()) > 0:
+                save_path = os.path.join(TRANSSCRIPTIONS_FOLDER, recording_id + "-" + datetime.datetime.now().isoformat()+".txt")
+                with open(save_path, 'w') as f:
+                    f.write(result['text'].strip())
+            # generateImage(result['text'])
 
 transcriber = Thread(target=transcribe_thread)
 transcriber.start()
-folder_name = "recordings"
 
+recording_index = 0
 @app.route('/transcribe/<mic>', methods=['POST'])
 def addToQueue(mic):
+    global recording_index
     if request.method == 'POST':
         #language = request.form['language']
         #model = request.form['model_size']
-        os.makedirs(folder_name+str(mic), exist_ok=True)
-        save_path = os.path.join(folder_name+str(mic), "recording"+datetime.datetime.now().isoformat()+".wav")
-
+        os.makedirs(RECORDING_FOLDER+str(mic), exist_ok=True)
+        save_path = os.path.join(RECORDING_FOLDER+str(mic), f"recording-{recording_index}-"+datetime.datetime.now().isoformat()+".wav")
+        recording_index += 1
         with open(save_path, 'wb') as f:
             f.write(request.data)
 
         dataQueue.put(save_path)
 
-        print("Added to queue")
-        print(dataQueue.qsize())
-        return "Added to queue"
+        print(f"Added to queue, now size: {dataQueue.qsize()}")
+        return f"Added to queue ({dataQueue.qsize()})"
     else:
         return "This endpoint only processes POST wav blob"
 
