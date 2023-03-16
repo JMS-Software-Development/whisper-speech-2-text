@@ -4,6 +4,7 @@ from torch import autocast
 from diffusers import StableDiffusionPipeline
 from queue import Queue
 import time
+from data import *
 
 class DataStore():
     language = "dutch"
@@ -24,8 +25,7 @@ def generateImage(prompt):
     # with autocast("gpu"):
     print("Going to generate with prompt: " + prompt)
     image = data.pipe(prompt, guidance_scale=6)[0][0]
-    image.save("test.png")
-
+    return image
     # dataQueue.put(image)
 # prompt = "1girl, aqua eyes, baseball cap, blonde hair, closed mouth, earrings, green background, hat, hoop earrings, jewelry, looking at viewer, shirt, short hair, simple background, solo, upper body, yellow shirt"
 # # with autocast("gpu"):
