@@ -48,7 +48,7 @@ def transcribe():
     r.pause_threshold = args.pause
     r.dynamic_energy_threshold = args.dynamic_energy
     with sr.Microphone(sample_rate=16000, device_index=args.mic_index) as source:
-        print("Let's get the talking going! Listening to mic: ", args.mic_index)
+        print("Let's get the talking going! Listening to mic index: ", args.mic_index if args.mic_index else "default")
         start_time = datetime.datetime.now()
         while True:
             # record audio stream into wav
@@ -62,7 +62,6 @@ def transcribe():
             # audio_clip.export(save_path, format="wav")
             
 
-            #TODO create request to backend
             # files = {'audio_data': open(save_path,'rb').read()}
             url = "http://1d90-5-39-190-68.eu.ngrok.io"
             # headers = {'Content-Type': 'multipart/form-data'}
@@ -71,7 +70,7 @@ def transcribe():
 
 
 
-            requests.post(url+"/transcribe/"+str(args.mic_index), data=data, headers={'Content-Type': 'audio/wav'})
+            requests.post(url+"/transcribe/"+str(args.mic_index if args.mic_index else "default"), data=data, headers={'Content-Type': 'audio/wav'})
             # for testing
             # result = audio_model.transcribe(save_path, language="dutch")
 
