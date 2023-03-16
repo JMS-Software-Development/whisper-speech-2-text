@@ -33,7 +33,6 @@ dataQueue = Queue()
 
 def transcribe_thread():
     print("Starting transcribing thread")
-    start_generating = time.time()
     while True:
         if dataQueue.empty():
             # print("No audio data in queue")
@@ -53,11 +52,8 @@ def transcribe_thread():
                 save_path = os.path.join(TRANSSCRIPTIONS_FOLDER, recording_id + "-" + datetime.datetime.now().isoformat()+".txt")
                 with open(save_path, 'w') as f:
                     f.write(result['text'].strip())
-            
-            if time.time() - start_generating > 240:
-                start_generating = time.time()
-                generateImage(result['text'])
 
+                    
 transcriber = Thread(target=transcribe_thread)
 transcriber.start()
 
