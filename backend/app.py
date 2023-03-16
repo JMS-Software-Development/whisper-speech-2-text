@@ -17,7 +17,8 @@ app = flask.Flask(__name__)
 CORS(app)
 class DataStore():
     language = "dutch"
-    model = "small"
+    # print("models available", whisper.available_models())
+    model = "tiny" #tiny, base, small, medium, large, large-v1, large-v2
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using device: ", device)
     audio_model = whisper.load_model(model)
@@ -52,7 +53,10 @@ def transcribe_thread():
                 save_path = os.path.join(TRANSSCRIPTIONS_FOLDER, recording_id + "-" + datetime.datetime.now().isoformat()+".txt")
                 with open(save_path, 'w') as f:
                     f.write(result['text'].strip())
-            # generateImage(result['text'])
+
+            if time.time() - start_generating > 240:
+                start_generating = time.time()
+                generateImage(result['text'])
 
 transcriber = Thread(target=transcribe_thread)
 transcriber.start()
