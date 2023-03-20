@@ -15,12 +15,13 @@ import requests
 from time import perf_counter
 
 for index, mic in enumerate(sr.Microphone.list_microphone_names()):
-    print("Microphone " +str(index) +": "+str(mic))
+    print("Microphone " + str(index) + ": "+str(mic))
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument("--mic_index", help="index corresponding to microphone input for audio recording", type=int )
+parser.add_argument(
+    "--mic_index", help="index corresponding to microphone input for audio recording", type=int)
 parser.add_argument("--energy", default=500,
                     help="Energy level for mic to detect", type=int)
 parser.add_argument("--dynamic_energy", default=False,
@@ -32,10 +33,11 @@ parser.add_argument("--pause", default=0.8,
 args = parser.parse_args()
 
 
-#create folder tmp with mic index
+# create folder tmp with mic index
 folder_name = "mic" + str(args.mic_index)
 os.makedirs(folder_name, exist_ok=True)
 save_path = folder_name
+
 
 def transcribe():
 
@@ -48,29 +50,34 @@ def transcribe():
     r.pause_threshold = args.pause
     r.dynamic_energy_threshold = args.dynamic_energy
     with sr.Microphone(sample_rate=16000, device_index=args.mic_index) as source:
-        print("Let's get the talking going! Listening to mic index: ", args.mic_index if args.mic_index else "default")
+        print("Let's get the talking going! Listening to mic index: ",
+              args.mic_index if args.mic_index else "default")
         start_time = datetime.datetime.now()
         while True:
             # record audio stream into wav
             audio = r.listen(source, phrase_time_limit=10)
-            #print time delta
+            # print time delta
             print("Time delta: ", datetime.datetime.now()-start_time)
             start = perf_counter()
             data = io.BytesIO(audio.get_wav_data())
             # audio_clip = AudioSegment.from_file(data)
             # save_path = os.path.join(folder_name, "recording"+datetime.datetime.now().isoformat()+".wav")
             # audio_clip.export(save_path, format="wav")
-            
 
             # files = {'audio_data': open(save_path,'rb').read()}
-            url = "http://1d90-5-39-190-68.eu.ngrok.io"
+            url = "http://185.4.148.126:8000"
             # headers = {'Content-Type': 'multipart/form-data'}
             # form_data = {'audio_data': open(save_path,'rb')}
 
+            # if this errors continue to next iteration
+            try:
+                requests.post(url+"/transcribe/"+str(args.mic_index if args.mic_index else "default"),
+                              data=data, headers={'Content-Type': 'audio/wav'})
 
+            except Exception as e:
+                print("Error: ", e)
+                continue
 
-
-            requests.post(url+"/transcribe/"+str(args.mic_index if args.mic_index else "default"), data=data, headers={'Content-Type': 'audio/wav'})
             # for testing
             # result = audio_model.transcribe(save_path, language="dutch")
 
@@ -84,6 +91,7 @@ def transcribe():
             #     for k,v in result.items():
             #         print(k,v)
             #     print("Processing delay: ", duration)
+
 
 if __name__ == "__main__":
     transcribe()

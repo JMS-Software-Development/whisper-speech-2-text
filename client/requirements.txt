@@ -1,0 +1,8 @@
+numpy
+tqdm
+transformers>=4.19.0
+ffmpeg-python==0.2.0
+pyaudio
+SpeechRecognition
+pydub
+wave
