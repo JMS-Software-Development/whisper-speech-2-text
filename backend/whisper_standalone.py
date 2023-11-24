@@ -4,7 +4,7 @@ from pydub import AudioSegment
 import speech_recognition as sr
 import tempfile
 import os
-from time import perf_counter
+from time import perf_counter, sleep
 import requests
 from dotenv import load_dotenv
 load_dotenv()
@@ -13,6 +13,11 @@ load_dotenv()
 
 api_key = os.getenv('OPENAI_KEY')
 from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+)
+
 save_to_relative_path = "generated_images/"
 
 
@@ -54,58 +59,71 @@ def transcribe():
 
     # load the speech recognizer with CLI settings
     r = sr.Recognizer()
-    #r.energy_threshold = args.energy
+    r.energy_threshold = 400
     #r.pause_threshold = args.pause
-    #r.dynamic_energy_threshold = args.dynamic_energy
-
+    r.dynamic_energy_threshold = False
+    api_cost = 0
     with sr.Microphone() as source:
         print("Let's get the talking going!")
         while True:
             # record audio stream into wav
-            audio = r.listen(source)
-            start = perf_counter()
-            data = io.BytesIO(audio.get_wav_data())
-            audio_clip = AudioSegment.from_file(data)
-            audio_clip.export(save_path, format="wav")
+            try:
+                audio = r.listen(source, phrase_time_limit=5, timeout=10)
+                print('threshold: ' + str(r.energy_threshold))
+                start = perf_counter()
 
-            #transcribe using whisper api
-            audio_file= open(save_path, "rb")
-            transcript = client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text")
-            print(transcript)
-            result = transcript
+            except sr.WaitTimeoutError:
+                print("No speech detected")
+                r.adjust_for_ambient_noise(source)
+                continue
 
-            if not args.verbose:
-                predicted_text = result
-                print("Text: " + predicted_text)
-            else:
-                predicted_text = result
-                end = perf_counter()
-                duration = end-start
-                for k,v in result.items():
-                    print(k,v)
-                print("Processing delay: ", duration)
-            if "Thank you for watching" in predicted_text:
-                continue #skip this transcription, which often arises when no text is predicted
-            if len(predicted_text) > 1:
-                #transcription2imageprompt
-                image_prompt = get_prompt(predicted_text)
+            print(audio)
+            # Check if the audio volume is above the minimum threshold
+            if audio:
+                data = io.BytesIO(audio.get_wav_data())
+                audio_clip = AudioSegment.from_file(data)
+                audio_clip.export(save_path, format="wav")
 
-                #imageprompt2image
-                # Make API call to get image
-                response = client.images.generate(
-                  prompt= image_prompt,
-                  n=1,
-                  size= "512x512"
-                )
-                img_data = requests.get(response.data[0].url).content
-                print(response.data[0].url)
-                img_name = image_prompt.replace(' ', '_').replace('.','').replace(',','') + ".png"
-                with open(save_to_relative_path + img_name, 'wb') as handler:
-                    handler.write(img_data)
-                print("image downloaded")
+                #transcribe using whisper api
+                audio_file= open(save_path, "rb")
+                transcript = client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text")
+                print(transcript)
+                result = transcript
 
-            if check_stop_word(predicted_text):
-                break
+                api_cost += 1
+
+                if not args.verbose:
+                    predicted_text = result
+                    print("Text: " + predicted_text)
+                else:
+                    predicted_text = result
+                    end = perf_counter()
+                    duration = end-start
+                    for k,v in result.items():
+                        print(k,v)
+                    print("Processing delay: ", duration)
+                if "Thank you for watching" in predicted_text:
+                    continue #skip this transcription, which often arises when no text is predicted
+                if len(predicted_text) > 1:
+                    #transcription2imageprompt
+                    image_prompt = get_prompt(predicted_text)
+
+                    #imageprompt2image
+                    # Make API call to get image
+                    response = client.images.generate(
+                      prompt= image_prompt,
+                      n=1,
+                      size= "512x512"
+                    )
+                    img_data = requests.get(response.data[0].url).content
+                    print(response.data[0].url)
+                    img_name = image_prompt.replace(' ', '_').replace('.','').replace(',','') + ".png"
+                    with open(save_to_relative_path + img_name, 'wb') as handler:
+                        handler.write(img_data)
+                    print("image downloaded")
+
+                if check_stop_word(predicted_text):
+                    break
 
 def get_prompt(transcription, add_imagery=False):
     prompt = "DEFAULT PROMPT " + transcription
