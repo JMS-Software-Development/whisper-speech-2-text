@@ -1,0 +1,7 @@
+Startup:
+source ./venv/bin/activate
+python3 ./whisper_standalone.py
+export PYTHONIOENCODING=utf-8
+
+Install:
+pip install -r requirements.txt
